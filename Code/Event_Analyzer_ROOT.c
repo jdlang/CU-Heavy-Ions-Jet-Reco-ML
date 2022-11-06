@@ -27,7 +27,7 @@ void Particle_Analyzer( char* input_file_name, char* input_tree_name, int label_
     // Sets file prefix based on input tree name
     char particle_dir[200];
     sprintf(particle_dir, "%s/Plots_Particles", dir_plots);
-    std::__fs::filesystem::create_directories(particle_dir);
+    //std::__fs::filesystem::create_directories(particle_dir);
     
     char file_prefix[4];
     char file_title[100];
@@ -292,7 +292,7 @@ void Particle_PID_Analyzer( char* input_file_name, char* input_tree_name, int la
 void Jet_Analyzer( char* input_file_name, char* input_tree_name, int label_arr_size, char* label_arr[10], bool bool_make_plots ) {
     char jet_dir[200];
     sprintf(jet_dir, "%s/Plots_Jets", dir_plots);
-    std::__fs::filesystem::create_directories(jet_dir);
+    //std::__fs::filesystem::create_directories(jet_dir);
     
     // Sets file prefix based on input tree name
     char file_prefix[4];
@@ -463,7 +463,7 @@ void Jet_Analyzer_pt_y_Cut( char* input_file_name, int label_arr_size, char* lab
     
     char jet_dir[200];
     sprintf(jet_dir, "%s/Plots_Jets/Hard_Jets", dir_plots);
-    std::__fs::filesystem::create_directories(jet_dir);
+    //std::__fs::filesystem::create_directories(jet_dir);
     
     // Opens and reads the Root file
     char pythia_file_path[200];

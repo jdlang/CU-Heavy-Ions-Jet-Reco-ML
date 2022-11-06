@@ -118,7 +118,6 @@ void Jet_ML_Prep(char* file_name, char* output_tree_description, float pt_min, f
     
     char subdir_plots[200];
     sprintf(subdir_plots, "%s/MachineLearning", dir_plots);
-    std::__fs::filesystem::create_directories(subdir_plots);
     
     // Plotted Data Output Tree
     // NOTE: This assumes jets have already been sorted from highest E to lowest E by FastJet!

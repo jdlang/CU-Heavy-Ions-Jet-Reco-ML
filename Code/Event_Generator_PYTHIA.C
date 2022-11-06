@@ -13,7 +13,6 @@ using namespace Pythia8;
 #include "TRandom.h"
 #include <cmath>
 #include <iostream>
-#include <filesystem>
 #include "_header.h"
 using namespace Project_Constants;
 
@@ -259,7 +258,7 @@ double Power_Func(double *x,double *par) {
     return fitval;
 }
 
-double Flat_Func(double *x,double *par) {
+double FlatFunc(double *x,double *par) {
     double fitval = par[0] * 1;
     return fitval;
 }
@@ -305,8 +304,8 @@ void Thermal_Generator(char* file_name, int func_eventCount) {
     
     n_func = new TF1("n_func", Gaussian_Func, 0, 2 * gaus_mean, 3);
     pt_func = new TF1("pt_func", ModifiedHagedorn_Func, 0, 100, 4);
-    eta_func = new TF1("eta_func", Flat_Func, -1 * eta_max, eta_max, 1);
-    phi_func = new TF1("phi_func", Flat_Func, -1 * math_pi, math_pi, 1);
+    eta_func = new TF1("eta_func", FlatFunc, -1 * eta_max, eta_max, 1);
+    phi_func = new TF1("phi_func", FlatFunc, -1 * math_pi, math_pi, 1);
 
     n_func->SetParameters(gaus_norm, gaus_mean, gaus_sigma);
     pt_func->SetParameters(64547, 3.076, 1.126, -8.491);
@@ -690,13 +689,10 @@ void Event_Generator(char* file_name, int func_eventCount, float func_beamPower,
 int main() {
     bool print_out = ::print_out;
     
-    std::__fs::filesystem::create_directories(dir_master);
-    std::__fs::filesystem::create_directories(dir_data);
-    std::__fs::filesystem::create_directories(dir_plots);
     
     Event_Generator(
         "10_90_Train_Trees.root", // file name
-        100000,     // number of events to generate
+        250000,     // number of events to generate
         beamPower,  // beam power
         8.,        // pt bias power (pt^x), set to -1. to disable bias
         10.,        // pt min for slimming
@@ -704,12 +700,12 @@ int main() {
         slim_rap);  // max rapidity for slimming
     
     Event_Generator(
-        "20_40_Test_Trees.root", // file name
-        100000,     // number of events to generate
+        "30_70_Train_Trees.root", // file name
+        250000,     // number of events to generate
         beamPower,  // beam power
         -1,        // pt bias power (pt^x), set to -1. to disable bias
-        20.,        // pt min for slimming
-        40.,        // pt max for slimming
+        30.,        // pt min for slimming
+        70.,        // pt max for slimming
         slim_rap);  // max rapidity for slimming
     
     Event_Generator(
@@ -721,7 +717,7 @@ int main() {
         60.,        // pt max for slimming
         slim_rap);  // max rapidity for slimming
     
-    Event_Generator(
+    /* Event_Generator(
         "60_80_Test_Trees.root", // file name
         100000,     // number of events to generate
         beamPower,  // beam power
@@ -729,6 +725,6 @@ int main() {
         60.,        // pt min for slimming
         80.,        // pt max for slimming
         slim_rap);  // max rapidity for slimming
-    
+    */
     return 0;
 }
