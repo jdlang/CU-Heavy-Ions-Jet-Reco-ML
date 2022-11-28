@@ -368,51 +368,61 @@ void Event_Generator(char* file_name, int func_eventCount, float func_beamPower,
 
 
 int main() {
-    bool print_out = ::print_out;
-    
-    for(int i=2; i<10; i++)
-      {
-	string s("10_90_Train_Trees");
-	string t = to_string(i);
-	string u(".root");
-	string stu = s+t+u;
-	char* file;
-        file = const_cast<char*>(stu.c_str());
-	Event_Generator(
-			file, // file name
-			3000*i,     // number of events to generate
-			beamPower,  // beam power
-			(float)i,        // pt bias power (pt^x), set to -1. to disable bias
-			10.,        // pt min for slimming
-			90.,        // pt max for slimming
-			slim_rap);  // max rapidity for slimming
-      }
-    Event_Generator(
-		    "30_70_Train_Trees.root", // file name
-		    25000,     // number of events to generate
-		    beamPower,  // beam power
-		    4,        // pt bias power (pt^x), set to -1. to disable bias
-		    30.,        // pt min for slimming
-		    70.,        // pt max for slimming
-		    slim_rap);  // max rapidity for slimming
-    
-    Event_Generator(
-		    "40_60_Test_Trees.root", // file name
-		    10000,     // number of events to generate
-		    beamPower,  // beam power
-		    4,        // pt bias power (pt^x), set to -1. to disable bias
-		    40.,        // pt min for slimming
-		    60.,        // pt max for slimming
-		    slim_rap);  // max rapidity for slimming
-    /*
+  int npower = 3;
+  bool print_out = ::print_out;
+  int powers[npower] = {2, 4, 8};
+  //int ns[11] = {1000000,250000,250000,250000,250000,250000,250000,250000,250000,250000,250000};
+  int ntrials = 250000;
+  for(int i=0; i<npower; ++i)
+    {
+      string s("10_90_Train_Trees");
+      string t = to_string(powers[i]);
+      string u(".root");
+      string stu = s+t+u;
+      string r("40_60_Train_Trees");
+      string rtu = r+t+u;
+      char* file = const_cast<char*>(stu.c_str());
+      char* file2 = const_cast<char*>(rtu.c_str());
+      /*
       Event_Generator(
-      "60_80_Test_Trees.root", // file name
-      100000,     // number of events to generate
-      beamPower,  // beam power
-      -1,        // pt bias power (pt^x), set to -1. to disable bias
-      60.,        // pt min for slimming
-      80.,        // pt max for slimming
-      slim_rap);  // max rapidity for slimming
-    */
-    return 0;
+		      file, // file name
+		      ntrials,     // number of events to generate
+		      beamPower,  // beam power
+		      (float)powers[i],        // pt bias power (pt^x), set to -1. to disable bias
+		      10.,        // pt min for slimming
+		      90.,        // pt max for slimming
+		      slim_rap);  // max rapidity for slimming
+      */
+      Event_Generator(
+		      file2, // file name
+		      ntrials,     // number of events to generate
+		      beamPower,  // beam power
+		      (float)powers[i],        // pt bias power (pt^x), set to -1. to disable bias
+		      40.,        // pt min for slimming
+		      60.,        // pt max for slimming
+		      slim_rap);  // max rapidity for slimming
+    }
+  
+  /*
+    Event_Generator(
+    "30_70_Train_Trees.root", // file name
+    25000,     // number of events to generate
+    beamPower,  // beam power
+    4,        // pt bias power (pt^x), set to -1. to disable bias
+    30.,        // pt min for slimming
+    70.,        // pt max for slimming
+    slim_rap);  // max rapidity for slimming
+  */
+  
+  /*
+    Event_Generator(
+    "60_80_Test_Trees.root", // file name
+    100000,     // number of events to generate
+    beamPower,  // beam power
+    -1,        // pt bias power (pt^x), set to -1. to disable bias
+    60.,        // pt min for slimming
+    80.,        // pt max for slimming
+    slim_rap);  // max rapidity for slimming
+  */
+  return 0;
 }

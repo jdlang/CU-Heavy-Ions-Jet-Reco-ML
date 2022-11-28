@@ -21,7 +21,7 @@ char* label_arr[label_arr_size] = {
 const bool printOut = true;
 const bool debug = false;
 
-const int max_jets = 100;
+const int max_jets = 2;
 const int max_parts = 400;
 //const char* output_file_name = "Jet_ML_Prep.root";
 
@@ -164,29 +164,29 @@ void Jet_ML_Prep(char* file_name, char* output_tree_description, float pt_min, f
     float  background_rho;
     
     output_tree->Branch("jet_n",                &jet_n);
-    output_tree->Branch("jet_pt_raw",           jet_pt_raw,         "jet_pt_raw[100]/F");
-    output_tree->Branch("jet_pt_corr",          jet_pt_corr,        "jet_pt_corr[100]/F");
-    output_tree->Branch("jet_pt_true_pythia",   jet_pt_true_pythia, "jet_pt_true_pythia[100]/F");
-    output_tree->Branch("jet_pt_true_paper",    jet_pt_true_paper,  "jet_pt_true_paper[100]/F");
-    output_tree->Branch("jet_mass",             jet_mass,           "jet_mass[100]/F");
-    output_tree->Branch("jet_area",             jet_area,           "jet_area[100]/F");
-    output_tree->Branch("jet_area_err",         jet_area_err,       "jet_area_err[100]/F");
-    output_tree->Branch("jet_const_n",          jet_const_n,        "jet_const_n[100]/I");
-    output_tree->Branch("const_pt_mean",        const_pt_mean,      "const_pt_mean[100]/F");
-    output_tree->Branch("const_pt_median",      const_pt_median,    "const_pt_median[100]/F");
-    output_tree->Branch("const_1_pt",           const_1_pt,         "const_1_pt[100]/F");
-    output_tree->Branch("const_2_pt",           const_2_pt,         "const_2_pt[100]/F");
-    output_tree->Branch("const_3_pt",           const_3_pt,         "const_3_pt[100]/F");
-    output_tree->Branch("const_4_pt",           const_4_pt,         "const_4_pt[100]/F");
-    output_tree->Branch("const_5_pt",           const_5_pt,         "const_5_pt[100]/F");
-    output_tree->Branch("const_6_pt",           const_6_pt,         "const_6_pt[100]/F");
-    output_tree->Branch("const_7_pt",           const_7_pt,         "const_7_pt[100]/F");
-    output_tree->Branch("const_8_pt",           const_8_pt,         "const_8_pt[100]/F");
-    output_tree->Branch("const_9_pt",           const_9_pt,         "const_9_pt[100]/F");
-    output_tree->Branch("const_10_pt",          const_10_pt,        "const_10_pt[100]/F");
-    output_tree->Branch("jet_y",                jet_y,              "jet_y[100]/F");
-    output_tree->Branch("jet_phi",              jet_phi,            "jet_phi[100]/F");
-    output_tree->Branch("jet_rho",              jet_rho,            "jet_rho[100]/F");
+    output_tree->Branch("jet_pt_raw",           jet_pt_raw,         "jet_pt_raw[2]/F");
+    output_tree->Branch("jet_pt_corr",          jet_pt_corr,        "jet_pt_corr[2]/F");
+    output_tree->Branch("jet_pt_true_pythia",   jet_pt_true_pythia, "jet_pt_true_pythia[2]/F");
+    output_tree->Branch("jet_pt_true_paper",    jet_pt_true_paper,  "jet_pt_true_paper[2]/F");
+    output_tree->Branch("jet_mass",             jet_mass,           "jet_mass[2]/F");
+    output_tree->Branch("jet_area",             jet_area,           "jet_area[2]/F");
+    output_tree->Branch("jet_area_err",         jet_area_err,       "jet_area_err[2]/F");
+    output_tree->Branch("jet_const_n",          jet_const_n,        "jet_const_n[2]/I");
+    output_tree->Branch("const_pt_mean",        const_pt_mean,      "const_pt_mean[2]/F");
+    output_tree->Branch("const_pt_median",      const_pt_median,    "const_pt_median[2]/F");
+    output_tree->Branch("const_1_pt",           const_1_pt,         "const_1_pt[2]/F");
+    output_tree->Branch("const_2_pt",           const_2_pt,         "const_2_pt[2]/F");
+    output_tree->Branch("const_3_pt",           const_3_pt,         "const_3_pt[2]/F");
+    output_tree->Branch("const_4_pt",           const_4_pt,         "const_4_pt[2]/F");
+    output_tree->Branch("const_5_pt",           const_5_pt,         "const_5_pt[2]/F");
+    output_tree->Branch("const_6_pt",           const_6_pt,         "const_6_pt[2]/F");
+    output_tree->Branch("const_7_pt",           const_7_pt,         "const_7_pt[2]/F");
+    output_tree->Branch("const_8_pt",           const_8_pt,         "const_8_pt[2]/F");
+    output_tree->Branch("const_9_pt",           const_9_pt,         "const_9_pt[2]/F");
+    output_tree->Branch("const_10_pt",          const_10_pt,        "const_10_pt[2]/F");
+    output_tree->Branch("jet_y",                jet_y,              "jet_y[2]/F");
+    output_tree->Branch("jet_phi",              jet_phi,            "jet_phi[2]/F");
+    output_tree->Branch("jet_rho",              jet_rho,            "jet_rho[2]/F");
     output_tree->Branch("background_rho",       &background_rho);
     
     int jet_const_n_total = 0;

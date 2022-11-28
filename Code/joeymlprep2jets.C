@@ -25,7 +25,7 @@ const int max_jets = 100;
 const int max_parts = 400;
 //const char* output_file_name = "Jet_ML_Prep.root";
 
-void Jet_ML_Prep(char* file_name, char* output_tree_description, float pt_min, float pt_max, int i, char* dir_data) {
+void Jet_ML_Prep(char* file_name, char* output_tree_description, float pt_min, float pt_max, int i) {
     
   char output_file_name[200];
   sprintf(output_file_name, "ML_Prep_%s%d.root", file_name, i);
@@ -39,7 +39,7 @@ void Jet_ML_Prep(char* file_name, char* output_tree_description, float pt_min, f
   char combined_file_path[200];
   sprintf(combined_file_path, "%s/Pyth_%s_Trees%d.root", dir_data, file_name, i);
   TFile* combined_file = new TFile(combined_file_path);
-  
+    
   TTree* combJet_tree = (TTree*) combined_file->Get("Otherfj_tree");
     
   std::cout << "Reading combined file." << std::endl;
@@ -104,7 +104,7 @@ void Jet_ML_Prep(char* file_name, char* output_tree_description, float pt_min, f
   pythJet_tree->SetBranchAddress("jet_const_E",   p_jet_const_E);
   // Sets output file and plot directory
   char output_file_path[200];
-  sprintf(output_file_path, "%s/%s", "./", output_file_name);
+  sprintf(output_file_path, "%s/%s", dir_data, output_file_name);
   TFile* output_file = new TFile(output_file_path, "RECREATE");
   TTree* output_tree = new TTree(output_tree_name, output_tree_description);
   std::cout << "All files open." << std::endl;
@@ -130,54 +130,54 @@ void Jet_ML_Prep(char* file_name, char* output_tree_description, float pt_min, f
     
   // ML X value variables (features)
   int    jet_n;
-  float  jet_pt_raw[max_jets];
-  float  jet_pt_corr[max_jets];
-  float  jet_pt_true_pythia[max_jets];
-  float  jet_pt_true_paper[max_jets];
-  float  jet_mass[max_jets];
-  float  jet_area[max_jets];
-  float  jet_area_err[max_jets];
-  int    jet_const_n[max_jets];
-  float  const_pt_mean[max_jets];
-  float  const_pt_median[max_jets];
-  float  const_1_pt[max_jets];
-  float  const_2_pt[max_jets];
-  float  const_3_pt[max_jets];
-  float  const_4_pt[max_jets];
-  float  const_5_pt[max_jets];
-  float  const_6_pt[max_jets];
-  float  const_7_pt[max_jets];
-  float  const_8_pt[max_jets];
-  float  const_9_pt[max_jets];
-  float  const_10_pt[max_jets];
-  float  jet_y[max_jets];
-  float  jet_phi[max_jets];
-  float  jet_rho[max_jets];
+  float  jet_pt_raw[2];
+  float  jet_pt_corr[2];
+  float  jet_pt_true_pythia[2];
+  float  jet_pt_true_paper[2];
+  float  jet_mass[2];
+  float  jet_area[2];
+  float  jet_area_err[2];
+  int    jet_const_n[2];
+  float  const_pt_mean[2];
+  float  const_pt_median[2];
+  float  const_1_pt[2];
+  float  const_2_pt[2];
+  float  const_3_pt[2];
+  float  const_4_pt[2];
+  float  const_5_pt[2];
+  float  const_6_pt[2];
+  float  const_7_pt[2];
+  float  const_8_pt[2];
+  float  const_9_pt[2];
+  float  const_10_pt[2];
+  float  jet_y[2];
+  float  jet_phi[2];
+  float  jet_rho[2];
   float  background_rho;
     
   output_tree->Branch("jet_n",                &jet_n);
-  output_tree->Branch("jet_pt_raw",           jet_pt_raw,         "jet_pt_raw[100]/F");
-  output_tree->Branch("jet_pt_corr",          jet_pt_corr,        "jet_pt_corr[100]/F");
-  output_tree->Branch("jet_pt_true_pythia",   jet_pt_true_pythia, "jet_pt_true_pythia[100]/F");
-  output_tree->Branch("jet_pt_true_paper",    jet_pt_true_paper,  "jet_pt_true_paper[100]/F");
-  output_tree->Branch("jet_mass",             jet_mass,           "jet_mass[100]/F");
-  output_tree->Branch("jet_area",             jet_area,           "jet_area[100]/F");
-  output_tree->Branch("jet_const_n",          jet_const_n,        "jet_const_n[100]/I");
-  output_tree->Branch("const_pt_mean",        const_pt_mean,      "const_pt_mean[100]/F");
-  output_tree->Branch("const_pt_median",      const_pt_median,    "const_pt_median[100]/F");
-  output_tree->Branch("const_1_pt",           const_1_pt,         "const_1_pt[100]/F");
-  output_tree->Branch("const_2_pt",           const_2_pt,         "const_2_pt[100]/F");
-  output_tree->Branch("const_3_pt",           const_3_pt,         "const_3_pt[100]/F");
-  output_tree->Branch("const_4_pt",           const_4_pt,         "const_4_pt[100]/F");
-  output_tree->Branch("const_5_pt",           const_5_pt,         "const_5_pt[100]/F");
-  output_tree->Branch("const_6_pt",           const_6_pt,         "const_6_pt[100]/F");
-  output_tree->Branch("const_7_pt",           const_7_pt,         "const_7_pt[100]/F");
-  output_tree->Branch("const_8_pt",           const_8_pt,         "const_8_pt[100]/F");
-  output_tree->Branch("const_9_pt",           const_9_pt,         "const_9_pt[100]/F");
-  output_tree->Branch("const_10_pt",          const_10_pt,        "const_10_pt[100]/F");
-  output_tree->Branch("jet_y",                jet_y,              "jet_y[100]/F");
-  output_tree->Branch("jet_phi",              jet_phi,            "jet_phi[100]/F");
-  output_tree->Branch("jet_rho",              jet_rho,            "jet_rho[100]/F");
+  output_tree->Branch("jet_pt_raw",           jet_pt_raw,         "jet_pt_raw[2]/F");
+  output_tree->Branch("jet_pt_corr",          jet_pt_corr,        "jet_pt_corr[2]/F");
+  output_tree->Branch("jet_pt_true_pythia",   jet_pt_true_pythia, "jet_pt_true_pythia[2]/F");
+  output_tree->Branch("jet_pt_true_paper",    jet_pt_true_paper,  "jet_pt_true_paper[2]/F");
+  output_tree->Branch("jet_mass",             jet_mass,           "jet_mass[2]/F");
+  output_tree->Branch("jet_area",             jet_area,           "jet_area[2]/F");
+  output_tree->Branch("jet_const_n",          jet_const_n,        "jet_const_n[2]/I");
+  output_tree->Branch("const_pt_mean",        const_pt_mean,      "const_pt_mean[2]/F");
+  output_tree->Branch("const_pt_median",      const_pt_median,    "const_pt_median[2]/F");
+  output_tree->Branch("const_1_pt",           const_1_pt,         "const_1_pt[2]/F");
+  output_tree->Branch("const_2_pt",           const_2_pt,         "const_2_pt[2]/F");
+  output_tree->Branch("const_3_pt",           const_3_pt,         "const_3_pt[2]/F");
+  output_tree->Branch("const_4_pt",           const_4_pt,         "const_4_pt[2]/F");
+  output_tree->Branch("const_5_pt",           const_5_pt,         "const_5_pt[2]/F");
+  output_tree->Branch("const_6_pt",           const_6_pt,         "const_6_pt[2]/F");
+  output_tree->Branch("const_7_pt",           const_7_pt,         "const_7_pt[2]/F");
+  output_tree->Branch("const_8_pt",           const_8_pt,         "const_8_pt[2]/F");
+  output_tree->Branch("const_9_pt",           const_9_pt,         "const_9_pt[2]/F");
+  output_tree->Branch("const_10_pt",          const_10_pt,        "const_10_pt[2]/F");
+  output_tree->Branch("jet_y",                jet_y,              "jet_y[2]/F");
+  output_tree->Branch("jet_phi",              jet_phi,            "jet_phi[2]/F");
+  output_tree->Branch("jet_rho",              jet_rho,            "jet_rho[2]/F");
   output_tree->Branch("background_rho",       &background_rho);
     
   int jet_const_n_total = 0;
@@ -190,7 +190,7 @@ void Jet_ML_Prep(char* file_name, char* output_tree_description, float pt_min, f
         
     // Finds the median pt of the background jets
         
-    float  background_jet_pt[max_jets];
+    float  background_jet_pt[max_jets]`;
     float  background_jet_area[max_jets];
     float  background_rho_arr[max_jets];
     float  background_area_median;
@@ -359,16 +359,16 @@ void Jet_ML_Prep(char* file_name, char* output_tree_description, float pt_min, f
 }
 
 void joeymlprep() {
-  int powers[4] = {-1,2,4,8};
-  for(int i=0; i<4; ++i)
+  int powers[3] = {-1,4,8};
+  for(int i=0; i<3; ++i)
     {
       Jet_ML_Prep(
 		  "10_90_Train",
 		  "TRAINING data for machine learning. 10-90 GeV with pT^n bias.",
-		  10., 90., powers[i],"~/datatemp");
+		  10., 90., powers[i]);
       Jet_ML_Prep(
 		  "40_60_Test",
 		  "TESTING data for machine learning. 40-60 GeV with pT^n bias.",
-		  40., 60., powers[i],"/media/qq/d5a34aca-26a3-4352-a198-657761eb9827");
+		  40., 60., powers[i]);
     }
 }

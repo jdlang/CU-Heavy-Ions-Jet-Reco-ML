@@ -688,8 +688,15 @@ void Event_Generator(char* file_name, int func_eventCount, float func_beamPower,
 
 int main() {
     bool print_out = ::print_out;
-    
-    
+    Event_Generator(
+		    "benchmark2.root", // file name
+		    25000,     // number of events to generate
+		    beamPower,  // beam power
+		    4,        // pt bias power (pt^x), set to -1. to disable bias
+		    30.,        // pt min for slimming
+		    70.,        // pt max for slimming
+		    slim_rap);  // max rapidity for slimming
+    /*
     Event_Generator(
         "10_90_Train_Trees.root", // file name
         250000,     // number of events to generate

@@ -28,199 +28,146 @@
 
 using namespace std;
 
-struct Jet
-{
-  float pt;
-  float et;
-  float ph;
-  int n;
-};
-
-struct Particle
-{
-  float pt;
-  float et;
-  float ph;
-  int jt;
-  int id;
-};
-
-struct Result
-{
-  float pt;
-  float et;
-  float ph;
-  float id;
-};
-
-bool comppt(const Jet &a, const Jet &b)
-{
-  return a.pt > b.pt;
-}
-
-float greaterval(float a, float b)
-{
-  if(a > b)
-    {
-      return a;
-    }
-  return b;
-}
-
-float lesserval(float a, float b)
-{
-  if(a < b)
-    {
-      return a;
-    }
-  return b;
-}
-
-float deltaR(Jet jet1, Jet jet2)
-{
-  float det = jet1.et - jet2.et;
-  float dph1 = jet1.ph - jet2.ph;
-  float dph2 = greaterval(jet1.ph, jet2.ph) - 2*M_PI - lesserval(jet1.ph, jet2.ph);
-  float dph = lesserval(abs(dph1), abs(dph2));
-  float dr = sqrt(det*det + dph*dph);
-  return dr;
-}
-
-void swapjets(vector<Jet> &b, int index1, int index2)
-{
-  Jet temp;
-  temp.pt = b[index1].pt;
-  temp.et = b[index1].et;
-  temp.ph = b[index1].ph;
-  temp.n = b[index1].n;
-  b[index1].pt = b[index2].pt;
-  b[index1].et = b[index2].et;
-  b[index1].ph = b[index2].ph;
-  b[index1].n = b[index2].n;
-  b[index2].pt = temp.pt;
-  b[index2].et = temp.et;
-  b[index2].ph = temp.ph;
-  b[index2].n = temp.n;
-}
-
-float totalr2(vector<Jet> a, vector<Jet> b)
-{
-  float total = 0;
-  for(int i=0; i<lesserval(a.size(), b.size()); i++)
-    {
-      total += deltaR(a[i], b[i]);
-    }
-  return total*total;
-}
-  
-
-void matchjets(vector<Jet> &truth, vector<Jet> &reco)
-{
-  float tdR2;
-  float ndR2;
-  int mindex1;
-  int mindex2;
-  int counter = 0;
-  float temp = 1;
-  float r = 0.97;
-  sort(truth.begin(), truth.end(), comppt);
-  sort(reco.begin(), reco.end(), comppt);
-  vector<Jet> recotemp;
-  do
-    {
-      recotemp.clear();
-      for(int i=0; i<reco.size(); i++)
-	{
-	  recotemp.push_back(reco[i]);
-	}
-      mindex1 = rand()%recotemp.size();
-      mindex2 = rand()%recotemp.size();
-      if(mindex1 >= recotemp.size() || mindex2 >= recotemp.size()) continue;
-      float chance = ((float)rand())/RAND_MAX;
-      if(chance < temp || counter < 100)
-	{
-	  swapjets(recotemp, mindex1, mindex2);
-	  counter++;
-	  temp *= r;
-	  continue;
-	}
-      temp *= r;
-      tdR2 = totalr2(recotemp, truth);
-      swapjets(recotemp, mindex1, mindex2);
-      ndR2 = totalr2(recotemp, truth);
-      if(ndR2 < tdR2)
-	{
-	  swapjets(reco, mindex1, mindex2);
-	}
-
-    } while(temp > 0.00000001);
-}
-
-float eta_from_index(int index)
-{
-  return (0.0245*floor(index / 256) - 1.152);
-}
-
-float phi_from_index(int index)
-{
-  return (0.024*(index % 256) - M_PI);
-}
-
-float pt_from_pxpy(float px, float py)
-{
-  return sqrt(px*px+py*py);
-}
-
-float eta_from_p(float px, float py, float pz)
-{
-  float magp = sqrt(px*px+py*py+pz*pz);
-  return atanh(pz/magp);
-}
-
 int drawhists(int display = 0)
 {
-  
+  string names[5] = {"Area Correction","Linear Regressor","MLP Regressor","Random Forest","ElasticNet Regressor"};
+  float mean[3][3][3][5];
+  float rmse[3][3][3][5];
   string feats[3] = {"1","3","12"};
-  string trains[2] = {"10_90","30_70"};
+  int powers[3] = {-1,4,8};
+  string train = "10_90";
   gStyle->SetOptStat(0);
-  for(int k=0; k<2; k++)
+  TH1F* meanhist[3][3][5];
+  TH1F* rmsehist[3][3][5];
+  for(int i=0; i<3; i++)
     {
-      string train = trains[k];
-      for(int j=0; j<3; ++j)
+      for(int j=0; j<5; j++)
 	{
-	  string feat = feats[j];
-	  TFile *f4 = TFile::Open(("./compiled/Data/results_" + train +"corrected" + feat + "Features.root").c_str());
-	  TFile *f3 = TFile::Open(("./compiled/Data/results_" + train +"MLPRegressor" + feat + "Features.root").c_str());
-	  TFile *f2 = TFile::Open(("./compiled/Data/results_" + train +"LinearRegression" + feat + "Features.root").c_str());
-	  TFile *f1 = TFile::Open(("./compiled/Data/results_" + train +"RandomForestRegressor" + feat + "Features.root").c_str());
-	  
-	  int ntypes = 4;
-	  TH1D *h[ntypes];
-	  TCanvas *c1 = new TCanvas("c1","c1");
-	  auto legend = new TLegend(0.1,0.7,0.4,0.9);
-	  h[0] = (TH1D*) f1->Get("hist");
-	  h[1] = (TH1D*) f2->Get("hist");
-	  h[2] = (TH1D*) f3->Get("hist");
-	  h[3] = (TH1D*) f4->Get("hist");
-	  
-	  string names[4] = {"Random Forest","Linear Regressor","MLP Regressor","Area Correction"};
-	  for(int i = 0; i<ntypes; i++)
+	  for(int k=0; k<3; ++k)
 	    {
-	      string title(h[i]->GetTitle());
-	      int pos = title.find("Falling");
-	      pos = title.find("Falling", pos+1);
-	      if(k==0) title.replace(pos,7,"Flat");
-	      pos = title.find("Test ");
-	      title.replace(pos,5,"");
-	      h[i]->SetTitle(title.c_str());
-	      h[i]->GetYaxis()->SetRangeUser(0,1000);
-	      h[i]->SetLineColor(i+6);
-	      legend->AddEntry(h[i],(names[i] + " #\sigma = " + to_string(h[i]->GetStdDev())).c_str(),"l");
-	      h[i]->Draw("SAME");
+	      meanhist[i][k][j] = new TH1F((to_string(i)+to_string(j)).c_str(),(to_string(i)+to_string(j)).c_str(), 10, -1.5, 8.5);
+	      rmsehist[i][k][j] = new TH1F((to_string(i)+to_string(j)).c_str(),(to_string(i)+to_string(j)).c_str(), 10, -1.5, 8.5);
 	    }
-	  legend->Draw();
-	  c1->SaveAs((feat + "Features" + train + ".pdf").c_str());
 	}
     }
+  for(int l=0; l<3; l++)
+    {
+      for(int j=0; j<3; j++)
+	{
+	  for(int k=0; k<3; ++k)
+	    {
+	      string feat = feats[j];
+	      TFile *f1 = TFile::Open(("./compiled/Data/results_" + train+ "train_ptbias" + to_string(powers[l])+ "test_ptbias" + to_string(powers[k]) +"corrected" + feat + "Features.root").c_str());
+	      TFile *f3 = TFile::Open(("./compiled/Data/results_" + train+ "train_ptbias" + to_string(powers[l])+ "test_ptbias" + to_string(powers[k]) +"MLPRegressor" + feat + "Features.root").c_str());
+	      TFile *f2 = TFile::Open(("./compiled/Data/results_" + train+ "train_ptbias" + to_string(powers[l])+ "test_ptbias" + to_string(powers[k]) +"LinearRegression" + feat + "Features.root").c_str());
+	      TFile *f4 = TFile::Open(("./compiled/Data/results_" + train+ "train_ptbias" + to_string(powers[l])+ "test_ptbias" + to_string(powers[k]) +"RandomForestRegressor" + feat + "Features.root").c_str());
+	      TFile *f5 = TFile::Open(("./compiled/Data/results_" + train+ "train_ptbias" + to_string(powers[l])+ "test_ptbias" + to_string(powers[k]) +"ElasticNet" + feat + "Features.root").c_str());
+	      int ntypes = 5;
+	      TH1D *h[ntypes];
+	      TCanvas *c1 = new TCanvas("c1","c1");
+	      auto legend = new TLegend(0.1,0.7,0.4,0.9);
+	      h[0] = (TH1D*) f1->Get("hist");
+	      h[1] = (TH1D*) f2->Get("hist");
+	      h[2] = (TH1D*) f3->Get("hist");
+	      h[3] = (TH1D*) f4->Get("hist");
+	      h[4] = (TH1D*) f5->Get("hist");
+	      
+	      for(int i = 0; i<ntypes; i++)
+		{
+		  mean[l][k][j][i] = h[i]->GetMean();
+		  rmse[l][k][j][i] = h[i]->GetStdDev();
+		  cout << mean[l][k][j][i] << " " << rmse[l][k][j][i] << endl;
+		  //if(abs(mean[l][k][j][i]) > 25) cout << mean[l][k][j][i] << endl; 
+		  string title(feat + "Features, 10-90 GeV p_{T} bias " + to_string(powers[l]) + " Train, 40-60 GeV p_{T} bias " + to_string(powers[k]) + " Test");
+		  h[i]->SetTitle(title.c_str());
+		  h[i]->GetYaxis()->SetRangeUser(0,25000);
+		  if(i == 4)
+		    {
+		      h[i]->SetMarkerColor(6);
+		    }
+		  else
+		    {
+		      h[i]->SetMarkerColor(i+1);
+		    }
+		  h[i]->SetMarkerStyle(i+39);
+		  legend->AddEntry(h[i],(names[i] + " #\sigma = " + to_string(h[i]->GetStdDev())).c_str(),"p");
+		  h[i]->Draw("P0 HIST SAME");
+		}
+	      legend->Draw();
+	      c1->SaveAs((feat + "Features" + train + "train_ptbias" + to_string(powers[l])+ "test_ptbias" + to_string(powers[k]) + ".pdf").c_str());
+	    }
+	}
+    }
+  int nons[7] = {0,1,2,3,5,6,7};
+  for(int i=0; i<3; i++)
+    {
+      for(int j=0; j<3; j++)
+	{
+	  TCanvas *c2 = new TCanvas("c2","c2");
+	  TCanvas *c3 = new TCanvas("c3","c3");
+	  auto legend2= new TLegend(0.35,0.7,0.65,0.9);
+	  auto legend3= new TLegend(0.35,0.7,0.65,0.9);
+	  for(int k=0; k<3; k++)
+	    {
+	      for(int l=0; l<5; l++)
+		{
+		  if(k==0)
+		    {
+		      legend2->AddEntry(meanhist[j][k][l], names[l].c_str(),"p");
+		      legend3->AddEntry(rmsehist[j][k][l], names[l].c_str(),"p");
+		    }
+		  for(int m=0; m<7; m++)
+		    {
+		      meanhist[j][k][l]->Fill(nons[m], 10000);
+		      rmsehist[j][k][l]->Fill(nons[m], 10000);
+		    }
+		  meanhist[j][k][l]->Fill(powers[k], mean[i][k][j][l]);
+		  meanhist[j][k][l]->SetMarkerStyle(l+39);
+		  if(l==4)
+		    {
+		      meanhist[j][k][l]->SetMarkerColor(6);
+		    }
+		  else
+		    {
+		      meanhist[j][k][l]->SetMarkerColor(l+1);
+		    }
+		  meanhist[j][k][l]->GetYaxis()->SetRangeUser(-30,30);
+		  meanhist[j][k][l]->GetXaxis()->SetTitle("Test p_{T} Bias Power");
+		  meanhist[j][k][l]->GetYaxis()->SetTitle("Mean of p_{T true} - p_{T corrected}");
+		  meanhist[j][k][l]->SetTitle(("Mean as a Function of Test p_{T} Bias Power, " + feats[j] + " Features, " + powers[i] + " Train p_{T} Bias Power"));
+		  rmsehist[j][k][l]->Fill(powers[k], rmse[i][k][j][l]);
+		  rmsehist[j][k][l]->SetMarkerStyle(l+39);
+		  if(l==4)
+		    {
+		      rmsehist[j][k][l]->SetMarkerColor(6);
+		    }
+		  else
+		    {
+		      rmsehist[j][k][l]->SetMarkerColor(l+1);
+		    }
+		  rmsehist[j][k][l]->GetYaxis()->SetRangeUser(0,15);
+		  rmsehist[j][k][l]->GetXaxis()->SetTitle("Test p_{T} Bias Power");
+		  rmsehist[j][k][l]->GetYaxis()->SetTitle("#\sigma of p_{T true} - p_{T corrected}");
+		  rmsehist[j][k][l]->SetTitle(("RMSE as a Function of Test p_{T} Bias Power, " + feats[j] + " Features, " + powers[i] + " Train p_{T} Bias Power"));
+		}
+	      for(int l=0; l<5; ++l)
+		{
+		  c2->cd();
+		  meanhist[j][k][l]->Draw("P0 HIST SAME");
+		  c3->cd();
+		  rmsehist[j][k][l]->Draw("P0 HIST SAME");
+		}
+	    }
+	  c3->cd();
+	  legend3->Draw();
+	  c2->cd();
+	  legend2->Draw();
+	  c2->SaveAs(("meantrend_train" + to_string(powers[i]) + "_" + feats[j] + "features.pdf").c_str());
+	  c3->SaveAs(("rmsetrend_train" + to_string(powers[i]) + "_" + feats[j] + "features.pdf").c_str());
+	  c2->Clear();
+	  c3->Clear();
+	}
+    }
+  
   return 0;
 }
