@@ -83,7 +83,7 @@ void Pythia_Generator(char* file_name, int func_eventCount, float func_beamPower
                       float func_ptBiasPow, float func_slimMin, float func_slimMax, float func_slimRap) {
     
     char file_path[200];
-    int temp_int = sprintf(file_path, "%s/Pyth_%s", dir_data, file_name);
+    int temp_int = sprintf(file_path, "~/datatemp/Pyth_%s", file_name);
     TFile* output_file = new TFile(file_path, "RECREATE");
     TTree* pythia_tree = new TTree("Combined_Tree","Tree of particle jet events from PYTHIA p+p collisions");
     TTree* jet_tree    = new TTree("FastJet_Tree","Tree of jet clusters by event from PYTHIA");
@@ -335,8 +335,8 @@ void Pythia_Generator(char* file_name, int func_eventCount, float func_beamPower
 	      pythia_tree ->Fill();
 	      jet_tree    ->Fill();
 	      otherjet    ->Fill();
+	      e++;
 	    }
-	  e++;
 	}
     }
 	
@@ -368,61 +368,51 @@ void Event_Generator(char* file_name, int func_eventCount, float func_beamPower,
 
 
 int main() {
-  int npower = 3;
-  bool print_out = ::print_out;
-  int powers[npower] = {2, 4, 8};
-  //int ns[11] = {1000000,250000,250000,250000,250000,250000,250000,250000,250000,250000,250000};
-  int ntrials = 250000;
-  for(int i=0; i<npower; ++i)
+  vector<int> powers;
+  vector<vector<int>> ranges;
+  ifstream openfile;
+  openfile.open("powers.txt");
+  int a, b;
+  while(openfile >> a)
     {
-      string s("10_90_Train_Trees");
+      powers.push_back(a);
+    }
+  openfile.close();
+  openfile.open("ranges.txt");
+  while(openfile >> a >> b)
+    {
+      vector<int> temp;
+      temp.push_back(a);
+      temp.push_back(b);
+      ranges.push_back(temp);
+    }
+  int ntrials = 500000;
+  for(int i=0; i<powers.size(); ++i)
+    {
+      string s(to_string(ranges[0][0]) + "_" + to_string(ranges[0][1]) + "_Train_Trees");
       string t = to_string(powers[i]);
       string u(".root");
       string stu = s+t+u;
-      string r("40_60_Train_Trees");
+      string r(to_string(ranges[1][0]) + "_" + to_string(ranges[1][1]) + "_Train_Trees");
       string rtu = r+t+u;
       char* file = const_cast<char*>(stu.c_str());
       char* file2 = const_cast<char*>(rtu.c_str());
-      /*
       Event_Generator(
 		      file, // file name
 		      ntrials,     // number of events to generate
 		      beamPower,  // beam power
 		      (float)powers[i],        // pt bias power (pt^x), set to -1. to disable bias
-		      10.,        // pt min for slimming
-		      90.,        // pt max for slimming
+		      ranges[0][0],        // pt min for slimming
+		      ranges[0][1],        // pt max for slimming
 		      slim_rap);  // max rapidity for slimming
-      */
       Event_Generator(
 		      file2, // file name
 		      ntrials,     // number of events to generate
 		      beamPower,  // beam power
 		      (float)powers[i],        // pt bias power (pt^x), set to -1. to disable bias
-		      40.,        // pt min for slimming
-		      60.,        // pt max for slimming
+		      ranges[1][0],        // pt min for slimming
+		      ranges[1][1],        // pt max for slimming
 		      slim_rap);  // max rapidity for slimming
     }
-  
-  /*
-    Event_Generator(
-    "30_70_Train_Trees.root", // file name
-    25000,     // number of events to generate
-    beamPower,  // beam power
-    4,        // pt bias power (pt^x), set to -1. to disable bias
-    30.,        // pt min for slimming
-    70.,        // pt max for slimming
-    slim_rap);  // max rapidity for slimming
-  */
-  
-  /*
-    Event_Generator(
-    "60_80_Test_Trees.root", // file name
-    100000,     // number of events to generate
-    beamPower,  // beam power
-    -1,        // pt bias power (pt^x), set to -1. to disable bias
-    60.,        // pt min for slimming
-    80.,        // pt max for slimming
-    slim_rap);  // max rapidity for slimming
-  */
   return 0;
 }
