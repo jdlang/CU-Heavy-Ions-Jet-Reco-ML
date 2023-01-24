@@ -9,6 +9,7 @@
 #include <filesystem>
 #include <algorithm>
 #include <fstream>
+#include <map>
 #include "_header.h"
 using namespace Project_Constants;
 
@@ -254,33 +255,38 @@ void Jet_ML_Prep(const char* file_name, char* output_tree_description, float pt_
 	jet_rho[q]          = 0;
       }
     for ( int j = 0 ; j < p_jet_n ; j++ ) {
+      int c_jet_match_check[100] = {0};
+      int c_jet_pot_pt[100] = {0};
       // Resets values for each iteration
- 
+      //int c_jet_max = 0;
       if(p_jet_pt[j] < pt_min || p_jet_pt[j] > pt_max)
 	{
 	  continue;
 	}
+      if(abs(p_jet_y[j]) > 0.5) continue;
       const_total_pt = 0.;
       for(int i=0; i<p_jet_n; ++i)
 	{
 	  const_pythia_pt[i] = 0.;
 	}
-	  
+      
       // Iterate through pythia jets to match jet pT_true
       int pythia_match = -1;
       int comb_match = -1;
       for ( int k = 0 ; k < c_jet_n ; k++ ) {
+	if(c_jet_match_check[k]) continue;
+	
 	float dy = pow(p_jet_y[j]-c_jet_y[k],2);
 	float dphi1;
 	if(c_jet_phi[k] > p_jet_phi[j])
 	  {
-	    dphi1 = pow(c_jet_y[k]-p_jet_y[j]-2*3.1415,2);
+	    dphi1 = pow(c_jet_phi[k]-p_jet_phi[j]-2*3.1415,2);
 	  }
 	else
 	  {
-	    dphi1 = pow(p_jet_y[j]-c_jet_y[k]-2*3.1415,2);
+	    dphi1 = pow(p_jet_phi[j]-c_jet_phi[k]-2*3.1415,2);
 	  }
-	float dphi2 = pow(p_jet_y[j]-c_jet_y[k],2);
+	float dphi2 = pow(p_jet_phi[j]-c_jet_phi[k],2);
 	float dphi;
 	if(dphi2 < dphi1)
 	  {
@@ -290,18 +296,46 @@ void Jet_ML_Prep(const char* file_name, char* output_tree_description, float pt_
 	  {
 	    dphi = dphi1;
 	  }
-	if ( ( pow((p_jet_y[j] - c_jet_y[k]), 2) + pow((p_jet_phi[j] - c_jet_phi[k]), 2) ) < fj_rSquared) {
-	  pythia_match = j;
-	  comb_match = k;
-	  break;
-	}
+	if (dphi + dy < fj_rSquared)
+	  {
+	  //if(c_jet_max < c_jet_pt[k])
+	  //  {
+	    c_jet_pot_pt[k] = 1;
+	      //   c_jet_max = c_jet_pt[k];
+	      //  }
+	  }
       }
-      if(pythia_match < 0) continue;
+      int bestmatch = -1;
+      float bestpt = 0;
+      for(int k=0; k<c_jet_n; ++k)
+	{
+	  if(c_jet_pot_pt[k])
+	    {
+	      if(c_jet_pt[k] > bestpt)
+		{
+		  bestmatch = k;
+		  pythia_match = j;
+		  bestpt = c_jet_pt[k];
+		}
+	    }
+	}
+      comb_match = bestmatch;
+      if(comb_match > 0)
+	{
+      c_jet_match_check[comb_match] = 1;
+	}
+      if(pythia_match < 0) {
+	if(p_jet_pt[j] > pt_min && p_jet_pt[j] < pt_max)
+	{
+	  cout << "WARNING: truth jet "<< e << " " << j << " has no match!" << endl;
+	}
+	continue;
+      }
       //cout << "test1" << endl;
       // Iterate through constituent particles to collect their pT for mean and median
       // This checks EVERY pythia particle in the jet, regardless of the jet match status
       
-      float  jet_const_pt_arr[c_jet_const_n[comb_match]];
+      float  jet_const_pt_arr[400];
       for(int k=0; k<p_jet_n; ++k)
 	{
 	  for(int q=0; q<p_jet_const_n[k]; ++q)
@@ -316,20 +350,27 @@ void Jet_ML_Prep(const char* file_name, char* output_tree_description, float pt_
       }
       //cout << "test1.125" << endl;
       //cout << jet_const_pt_arr[0] << endl;
-      std::sort(jet_const_pt_arr, jet_const_pt_arr + jet_const_n[j], greater<>());
-      if((c_jet_pt[comb_match] > 500) || (c_jet_pt[comb_match] < 0.04))
+      std::sort(jet_const_pt_arr, jet_const_pt_arr + c_jet_const_n[comb_match], greater<>());
+      if((c_jet_pt[comb_match] > 400) || (c_jet_pt[comb_match] < 0.04))
 	{
-	  jet_pt_raw[jet_n] = 0;
+	  continue;
 	}
       else
 	{
 	  jet_pt_raw[jet_n]       = c_jet_pt[comb_match];
 	}
+      /*
+      if(c_jet_const_n[comb_match] < 2)
+	{
+	  continue;
+	}
+      */
       jet_pt_corr[jet_n]      = jet_pt_raw[jet_n] - (background_rho * c_jet_area[comb_match]);
       jet_mass[jet_n]         = c_jet_mass[comb_match];
       jet_area[jet_n]         = c_jet_area[comb_match];
       jet_const_n[jet_n]      = c_jet_const_n[comb_match];
       //cout << "test1.25" << endl;
+      //YES, the below lines are correct. Look at the immediately preceding ones, dumbass!
       const_pt_mean[jet_n]    = TMath::Mean(jet_const_n[jet_n], jet_const_pt_arr);
       const_pt_median[jet_n]  = TMath::Median(jet_const_n[jet_n], jet_const_pt_arr);
       const_1_pt[jet_n]       = jet_const_pt_arr[0];
@@ -351,7 +392,7 @@ void Jet_ML_Prep(const char* file_name, char* output_tree_description, float pt_
 	{
 	  jet_pt_true_paper[jet_n] = 0;
 	}
-      if ( jet_pt_raw[jet_n] >= 0 && (e % 1000) == 0 ) std::cout << e << "-" << j << ": Raw Jet: " << jet_pt_raw[jet_n] << std::endl;
+      if (e % 1000 == 0 ) std::cout << e << "-" << j << ": Raw Jet: " << jet_pt_raw[jet_n] << std::endl;
             
       if ( pythia_match < 0 ) continue;
             
@@ -362,7 +403,7 @@ void Jet_ML_Prep(const char* file_name, char* output_tree_description, float pt_
 	  if((pt_min == 40) && (i == 8)) rawjetfile << jet_pt_raw[jet_n] << endl;
 	}
       jet_true_pythia_counter++;
-      if ( jet_pt_true_pythia[jet_n] != 0 && (e % 1000) == 0 ) std::cout << e << "-" << j << ": Truth_PYTHIA Jet: " << jet_pt_true_pythia[jet_n] << " ----- " << std::endl;
+      if (e % 1000 == 0 ) std::cout << e << "-" << j << ": Truth_PYTHIA Jet: " << jet_pt_true_pythia[jet_n] << " ----- " << std::endl;
       if(pythia_match >= 0)
 	{
 	  jet_n++;

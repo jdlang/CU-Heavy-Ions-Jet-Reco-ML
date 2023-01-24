@@ -112,7 +112,7 @@ void Pythia_Generator(char* file_name, int func_eventCount, float func_beamPower
     float   particle_pt[max_parts];     // transverse momentum
     float   particle_phi[max_parts];    // azimuthal angle
     float   particle_eta[max_parts];    // pseudorapidity
-    int     particle_m[max_parts];      // particle mass
+    float   particle_m[max_parts];      // particle mass
     
     int     jet_n;                      // jet index
     float   jet_pt[max_jets];           // transverse momentum
@@ -233,7 +233,7 @@ void Pythia_Generator(char* file_name, int func_eventCount, float func_beamPower
             particle_pt[particle_n]  = pythia.event[p].pT();
             particle_eta[particle_n] = pythia.event[p].eta();
             particle_phi[particle_n] = pythia.event[p].phi();
-	    particle_m[particle_n] = -pythia.event[p].m();
+	    particle_m[particle_n] = pythia.event[p].m();
 
             particle_n++;
         }
@@ -285,6 +285,10 @@ void Pythia_Generator(char* file_name, int func_eventCount, float func_beamPower
         if ( acceptJet ) {
 	  for (int p = 0 ; p < nParticles ; p++) {
             particle_pt[particle_n] = GenPt();
+	    if(particle_pt[particle_n] > 100)
+	      {
+		cout << "Somehow, a thermal particle has pT = " << particle_pt[particle_n] << endl;
+	      }
             particle_eta[particle_n] = GenEta();
             particle_phi[particle_n] = GenPhi();
 	    particle_m[particle_n] = m_pion;
@@ -386,14 +390,14 @@ int main() {
       temp.push_back(b);
       ranges.push_back(temp);
     }
-  int ntrials = 500000;
+  int ntrials = 10000;
   for(int i=0; i<powers.size(); ++i)
     {
       string s(to_string(ranges[0][0]) + "_" + to_string(ranges[0][1]) + "_Train_Trees");
       string t = to_string(powers[i]);
       string u(".root");
       string stu = s+t+u;
-      string r(to_string(ranges[1][0]) + "_" + to_string(ranges[1][1]) + "_Train_Trees");
+      string r(to_string(ranges[1][0]) + "_" + to_string(ranges[1][1]) + "_Test_Trees");
       string rtu = r+t+u;
       char* file = const_cast<char*>(stu.c_str());
       char* file2 = const_cast<char*>(rtu.c_str());
